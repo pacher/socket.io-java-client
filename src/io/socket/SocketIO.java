@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.Properties;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.json.JSONObject;
 
@@ -35,6 +34,9 @@ public class SocketIO {
 	private Properties headers = new Properties();
 
 	private URL url;
+
+	/** The query part of the URL. Used sometimes for authentication*/
+	private String urlQuery;
 
 	/**
 	 * Instantiates a new socket.io connection. The object connects after
@@ -217,6 +219,7 @@ public class SocketIO {
 			if (this.namespace.equals("/")) {
 				this.namespace = "";
 			}
+			this.urlQuery = this.url.getQuery();
 			this.connection = IOConnection.register(origin, this);
 			return true;
 		}
@@ -252,6 +255,15 @@ public class SocketIO {
 	public void emit(final String event, IOAcknowledge ack,
 			final Object... args) {
 		this.connection.emit(this, event, ack, args);
+	}
+	
+	/**
+	 * Gets the query part of the URL. Internally used.
+	 * 
+	 * @returnq uery part of the URL
+	 */
+	public String getUrlQuery() {
+		return this.urlQuery;
 	}
 
 	/**

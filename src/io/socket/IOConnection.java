@@ -25,9 +25,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,6 +74,9 @@ class IOConnection implements IOCallback {
 
 	/** The url for this connection. */
 	private URL url;
+
+	/** The query part of the URL. */
+	private String urlQuery;
 
 	/** The transport for this connection. */
 	private IOTransport transport;
@@ -128,7 +131,7 @@ class IOConnection implements IOCallback {
 
 	/** true if there's already a keepalive in {@link #outputBuffer}. */
 	private boolean keepAliveInQueue;
-
+	
 	/**
 	 * The heartbeat timeout task. Only null before connection has been
 	 * initialised.
@@ -295,7 +298,7 @@ class IOConnection implements IOCallback {
 		URLConnection connection;
 		try {
 			setState(STATE_HANDSHAKE);
-			url = new URL(IOConnection.this.url.toString() + SOCKET_IO_1);
+			url = new URL(IOConnection.this.url.toString() + SOCKET_IO_1 + (urlQuery != null ? ("?" + urlQuery) : ""));
 			connection = url.openConnection();
 			if (connection instanceof HttpsURLConnection) {
 				((HttpsURLConnection) connection)
@@ -407,6 +410,7 @@ class IOConnection implements IOCallback {
 		try {
 			this.url = new URL(url);
 			this.urlStr = url;
+			this.urlQuery = socket.getUrlQuery();
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
@@ -765,6 +769,15 @@ class IOConnection implements IOCallback {
 			reconnectTask = new ReconnectTask();
 			backgroundTimer.schedule(reconnectTask, 1000);
 		}
+	}
+	
+	/**
+	 * Returns the query part of the URL.
+	 * 
+	 * @returnq uery part of the URL
+	 */
+	public String getUrlQuery() {
+		return this.urlQuery;
 	}
 
 	/**

@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
 import org.java_websocket.client.WebSocketClient;
@@ -17,10 +16,11 @@ class WebsocketTransport extends WebSocketClient implements IOTransport {
     public static final String TRANSPORT_NAME = "websocket";
     private IOConnection connection;
     public static IOTransport create(URL url, IOConnection connection) {
+    	final String urlQuery = connection.getUrlQuery();
         URI uri = URI.create(
                 PATTERN_HTTP.matcher(url.toString()).replaceFirst("ws")
                 + IOConnection.SOCKET_IO_1 + TRANSPORT_NAME
-                + "/" + connection.getSessionId());
+                + "/" + connection.getSessionId() + (urlQuery != null ? ("?" + urlQuery) : ""));
 
         return new WebsocketTransport(uri, connection);
     }
